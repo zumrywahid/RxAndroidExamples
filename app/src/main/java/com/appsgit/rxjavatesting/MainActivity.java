@@ -234,21 +234,29 @@ public class MainActivity extends AppCompatActivity {
 //        Observable<Long> observable = Observable.interval(1, 1, TimeUnit.DAYS);
 //        Observable<Long> observable = Observable.interval(1, 1, TimeUnit.MILLISECONDS);
 
-        Observable<Long> observable = Observable.interval(1, 1, TimeUnit.SECONDS);
+        final Observable<Long> observable = Observable.interval(1, 1, TimeUnit.SECONDS);
 
         observable.observeOn(Schedulers.newThread());
 
         observable.subscribeOn(AndroidSchedulers.mainThread());
 
         observable.subscribe(new Observer<Long>(){
+            Disposable disposable = null;
 
             @Override
             public void onSubscribe(@NonNull Disposable disposable) {
+                this.disposable = disposable;
             }
 
             @Override
             public void onNext(@NonNull Long value) {
+
                 Log.d(TAG, "Observable.interval onNext: value is " + value );
+
+                //dispose observer after 10 seconds. We have set to TimeUnit.SECONDS.
+                if (disposable != null && value >= 10) {
+                    disposable.dispose();
+                }
             }
 
             @Override
